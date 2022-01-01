@@ -38,6 +38,7 @@ namespace API
 
         }
 
+        // Expression body definition with => (it is basically just short hand version of normal method)
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
