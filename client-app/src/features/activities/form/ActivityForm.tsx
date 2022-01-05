@@ -6,6 +6,7 @@ interface Props {
   activity: IActivity | undefined;
   closeForm: () => void;
   createOrEdit: (activity: IActivity) => void;
+  submitting: boolean;
 }
 
 //activity: selectedActivity => we are renaming our activity to selectedActivity because we had duplicated use of variable => useState activity
@@ -13,6 +14,7 @@ function ActivityForm({
   activity: selectedActivity,
   closeForm,
   createOrEdit,
+  submitting,
 }: Props) {
   const initialState = selectedActivity ?? {
     id: "",
@@ -59,6 +61,7 @@ function ActivityForm({
           onChange={handleChange}
         />
         <Form.Input
+          type="date"
           placeholder="Date"
           value={activity.date}
           name="date"
@@ -76,7 +79,13 @@ function ActivityForm({
           name="venue"
           onChange={handleChange}
         />
-        <Button floated="right" positive type="submit" content="Submit" />
+        <Button
+          loading={submitting}
+          floated="right"
+          positive
+          type="submit"
+          content="Submit"
+        />
         <Button
           onClick={closeForm}
           floated="right"
