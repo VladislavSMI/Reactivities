@@ -22,6 +22,8 @@ export default class ActivityStore {
   }
 
   loadActivities = async () => {
+    //any code that is asynchronious should go outside of try catch statement
+
     try {
       const activities = await agent.Activities.list();
 
@@ -43,6 +45,7 @@ export default class ActivityStore {
   };
 
   selectActivity = (id: string) => {
+    //Without MAP and with just normal Array => this.selectedActivity = this.activities.find(a => a.id === id);
     this.selectedActivity = this.activityRegistry.get(id);
   };
 
@@ -66,7 +69,7 @@ export default class ActivityStore {
 
     try {
       await agent.Activities.create(activity);
-      //this is because of mobx and async await functions => if we run code in await block then have to use this.
+      //this is because of mobx and async await functions => if we run code that changes the state in try await block then have to use this.
       runInAction(() => {
         this.activityRegistry.set(activity.id, activity);
         this.selectedActivity = activity;
@@ -86,7 +89,12 @@ export default class ActivityStore {
     try {
       await agent.Activities.update(activity);
       runInAction(() => {
-        //here we are using spread operator and not modifing state => basically we are coping state without old activity and then replacing it with updated one, id is not being updated
+        // Before changing code to MAP: here we are using spread operator and not modifing state => basically we are coping state without old activity and then replacing it with updated one, id is not being updated
+        // this.activities = [
+        //   ...this.activities.filter((a) => a.id !== activity.id),
+        //   activity,
+        // ];
+
         this.activityRegistry.set(activity.id, activity);
         this.editMode = false;
         this.loading = false;

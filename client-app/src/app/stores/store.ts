@@ -10,8 +10,10 @@ export const store: Store = {
   activityStore: new ActivityStore(),
 };
 
+// Create store is coming from React
 export const StoreContext = createContext(store);
 
+// React hook that will allow us to use our stores inside our components (useContext is also React hook)
 export function useStore() {
   return useContext(StoreContext);
 }
