@@ -1,7 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import agent from "../api/agent";
 import { IActivity } from "../models/activity";
-import { v4 as uuid } from "uuid";
 
 export default class ActivityStore {
   //Map with 2 types => first one is key which represents activity id and the second will be Activity object iteself
@@ -23,13 +22,12 @@ export default class ActivityStore {
 
   loadActivities = async () => {
     //any code that is asynchronious should go outside of try catch statement
-
+    this.loadingInitial = true;
     try {
       const activities = await agent.Activities.list();
 
       activities.forEach((activity) => {
-        activity.date = activity.date.split("T")[0];
-        this.activityRegistry.set(activity.id, activity);
+        this.setActivity(activity);
       });
       this.setLoadingInitial(false);
     } catch (error) {
@@ -39,33 +37,46 @@ export default class ActivityStore {
     }
   };
 
+  loadActivity = async (id: string) => {
+    let activity = this.getActivity(id);
+    if (activity) {
+      this.selectedActivity = activity;
+      //we are returning here activity so we can use it in Activity Form, where we are direclty calling loadActivity method in useEffect with then and set local state. If we use selectedActivity in  ActivityForm after useEffect with loadActivity(id) we will have timing issue. Our initial state will be empty, then we will loadScitivty, which will change selected activity and then another render for component. With current solution we will have less rendering
+      return activity;
+      //if there is no activity loaded in our store, then we have to make api call
+    } else {
+      this.loadingInitial = true;
+      try {
+        activity = await agent.Activities.details(id);
+        this.setActivity(activity);
+        runInAction(() => {
+          this.selectedActivity = activity;
+        });
+        this.setLoadingInitial(false);
+        return activity;
+      } catch (error) {
+        console.log(error);
+        this.setLoadingInitial(false);
+      }
+    }
+  };
+
+  private setActivity = (activity: IActivity) => {
+    activity.date = activity.date.split("T")[0];
+    this.activityRegistry.set(activity.id, activity);
+  };
+
+  private getActivity = (id: string) => {
+    return this.activityRegistry.get(id);
+  };
+
   //error with async await and mobx => we have to put code used after async in runInAction handlerer
   setLoadingInitial = (state: boolean) => {
     this.loadingInitial = state;
   };
 
-  selectActivity = (id: string) => {
-    //Without MAP and with just normal Array => this.selectedActivity = this.activities.find(a => a.id === id);
-    this.selectedActivity = this.activityRegistry.get(id);
-  };
-
-  cancelSelectedActivity = () => {
-    this.selectedActivity = undefined;
-  };
-
-  //id? => option parameter of id
-  openForm = (id?: string) => {
-    id ? this.selectActivity(id) : this.cancelSelectedActivity();
-    this.editMode = true;
-  };
-
-  closeForm = () => {
-    this.editMode = false;
-  };
-
   createActivity = async (activity: IActivity) => {
     this.loading = true;
-    activity.id = uuid();
 
     try {
       await agent.Activities.create(activity);
@@ -113,9 +124,6 @@ export default class ActivityStore {
       await agent.Activities.delete(id);
       runInAction(() => {
         this.activityRegistry.delete(id);
-        if (this.selectedActivity?.id === id) {
-          this.cancelSelectedActivity();
-        }
         this.loading = false;
       });
     } catch (error) {
