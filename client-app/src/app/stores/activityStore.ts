@@ -20,6 +20,20 @@ export default class ActivityStore {
     );
   }
 
+  get groupedActivities() {
+    return Object.entries(
+      this.activitiesByDate.reduce((activities, activity) => {
+        //this will represent key for each of our objects
+        const date = activity.date;
+        activities[date] = activities[date]
+          ? [...activities[date], activity]
+          : [activity];
+        return activities;
+        // initial value is empty object as type [key: string]: IActivity[]
+      }, {} as { [key: string]: IActivity[] })
+    );
+  }
+
   loadActivities = async () => {
     //any code that is asynchronious should go outside of try catch statement
     this.loadingInitial = true;
