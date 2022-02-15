@@ -13,7 +13,7 @@ namespace API.Extensions
   //It is extension class => best way is to declare it as static so we don't have to create new instance of this class when we use our extension methods
   public static class ApplicationServiceExtensions
   {
-    //We are extending IServiceCollection with additional methods => that why we have to use in parameter this.IServiceCollection services
+    //We are extending IServiceCollection with additional methods => that's why we have to use in parameter this.IServiceCollection services
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
     {
       services.AddSwaggerGen(c =>
@@ -21,8 +21,10 @@ namespace API.Extensions
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
           });
 
+      //AdddDbContext => we are getting it from entity framwork, type will be class of our database DataContext.cs
       services.AddDbContext<DataContext>(opt =>
       {
+        //config will get info from appsettings.Development.json or appsettings.json => we have specified there that "DefaultConnection": "Data source=reactivities.db" 
         opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
       });
 

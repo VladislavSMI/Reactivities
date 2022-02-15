@@ -14,7 +14,8 @@ namespace API.Controllers
     private IMediator _mediator;
     //protected means that it will be available to any derived class and BaseApiController itself
     //method being created in new way without need of return statement
-    // ??= it means that _mediator is null then set it up to right side
+    // return from this method _mediator (if we have it available) or ??= it means that if _mediator is null then set it up to HttpContext.RequestServices.GetService<IMediator>()
+    //HttpContext.RequestServices.GetService<IMediator>() this means that we are requesting mediator services that were added in ApplicationServiceExtensions 
     protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
 
   }

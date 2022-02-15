@@ -15,6 +15,7 @@ namespace Application.Activities
       public Guid Id { get; set; }
     }
 
+    //Handler has 2 parameters => first one input and second one is Return 
     public class Handler : IRequestHandler<Query, Activity>
     {
       private readonly DataContext _context;
@@ -24,7 +25,7 @@ namespace Application.Activities
         this._context = context;
       }
 
-    // first paramtere is request that is of Query class type and we have there Id property that we want to use
+      // first paramtere is request that is of Query class type and we have there Id property that we want to use
       public async Task<Activity> Handle(Query request, CancellationToken cancellationToken)
       {
         return await _context.Activities.FindAsync(request.Id);

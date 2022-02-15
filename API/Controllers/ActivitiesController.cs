@@ -28,6 +28,7 @@ namespace API.Controllers
     }
 
     [HttpPost]
+    // Return type IActionResult will give us access to return such as 200 OK, 401 etc. => but we are not actually return any data from database
     public async Task<IActionResult> CreateActivity(Activity activity)
     {
       return Ok(await Mediator.Send(new Create.Command { Activity = activity }));

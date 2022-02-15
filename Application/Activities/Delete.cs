@@ -9,6 +9,7 @@ namespace Application.Activities
 {
   public class Delete
   {
+    // nothing in return so we have IRequest without return type
     public class Command : IRequest
     {
       public Guid Id { get; set; }
