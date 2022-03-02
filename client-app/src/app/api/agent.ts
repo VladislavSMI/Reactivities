@@ -4,6 +4,7 @@ import { history } from "../../index";
 import { IActivity } from "../models/activity";
 import { store } from "../stores/store";
 
+//function to mimic delays in response from API in real environment
 const sleep = (delay: number) => {
   return new Promise((resolve) => {
     setTimeout(resolve, delay);

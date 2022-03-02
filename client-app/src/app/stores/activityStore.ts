@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import agent from "../api/agent";
 import { IActivity } from "../models/activity";
+import { format } from "date-fns";
 
 export default class ActivityStore {
   //Map with 2 types => first one is key which represents activity id and the second will be Activity object iteself
@@ -8,7 +9,7 @@ export default class ActivityStore {
   selectedActivity: IActivity | undefined = undefined;
   editMode = false;
   loading = false;
-  loadingInitial = true;
+  loadingInitial = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -16,7 +17,8 @@ export default class ActivityStore {
 
   get activitiesByDate() {
     return Array.from(this.activityRegistry.values()).sort(
-      (a, b) => Date.parse(a.date) - Date.parse(b.date)
+      //we have to used exclamation mark here, because we have defined that date can be type Date or null, because in activity form as initial state we want to use null so we don't have any date spcified
+      (a, b) => a.date!.getTime() - b.date!.getTime()
     );
   }
 
@@ -24,7 +26,7 @@ export default class ActivityStore {
     return Object.entries(
       this.activitiesByDate.reduce((activities, activity) => {
         //this will represent key for each of our objects
-        const date = activity.date;
+        const date = format(activity.date!, "dd MMM yyyy");
         activities[date] = activities[date]
           ? [...activities[date], activity]
           : [activity];
@@ -76,7 +78,9 @@ export default class ActivityStore {
   };
 
   private setActivity = (activity: IActivity) => {
-    activity.date = activity.date.split("T")[0];
+    //old code when we were using date as string
+    // activity.date = activity.date.split("T")[0];
+    activity.date = new Date(activity.date!);
     this.activityRegistry.set(activity.id, activity);
   };
 
