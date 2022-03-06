@@ -3,13 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain;
+using Microsoft.AspNetCore.Identity;
 
 namespace Persistence
 {
   public class Seed
   {
-    public static async Task SeedData(DataContext context)
+    public static async Task SeedData(DataContext context, UserManager<AppUser> userManager)
     {
+      if (userManager.Users.Any()) return;
+
+      var users = new List<AppUser>
+      {
+        new AppUser{DisplayName = "Bob", UserName = "bob", Email = "bob@test.com"},
+        new AppUser{DisplayName = "Tom", UserName = "tom", Email = "tom@test.com"},
+        new AppUser{DisplayName = "Jane", UserName = "jane", Email = "jane@test.com"},
+        new AppUser{DisplayName = "Vlado", UserName = "vlado", Email = "vlado@test.com"},
+      };
+
+      foreach (var user in users)
+      {
+        //userManager and CreateAsync is from AspNetCore.Identity and it will create and save for us use with password in teh database
+        await userManager.CreateAsync(user, "Pa$$w0rd");
+      }
+
+
       // We are going to check if we have any activities in our context and then we are going to just return it
       if (context.Activities.Any()) return;
 

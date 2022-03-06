@@ -7,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using FluentValidation.AspNetCore;
 using Application.Activities;
 using API.Middleware;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace API
 {
@@ -27,11 +29,17 @@ namespace API
     public void ConfigureServices(IServiceCollection services)
     {
 
-      services.AddControllers().AddFluentValidation(config =>
+      services.AddControllers(opt =>
+      {
+        var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+        opt.Filters.Add(new AuthorizeFilter(policy));
+      }
+      ).AddFluentValidation(config =>
       {
         config.RegisterValidatorsFromAssemblyContaining<Create>();
       });
       services.AddApplicationServices(_config);
+      services.AddIdentityServices(_config);
 
     }
 
@@ -54,6 +62,8 @@ namespace API
 
       app.UseCors("CorsPolicy");
 
+      //UserAuthentication has to go before UseAuthorization
+      app.UseAuthentication();
       app.UseAuthorization();
 
       app.UseEndpoints(endpoints =>
