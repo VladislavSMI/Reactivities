@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-  //We are not going to user mediator pattern for identity check
+  //We are not going to use mediator pattern for identity check
   //We are also not deriving from BaseApiController
   //AllowAnonymous is allowing to hit bellow end points even after setting up auhtorized routes in startup class
   [AllowAnonymous]
@@ -57,7 +57,7 @@ namespace API.Controllers
         ModelState.AddModelError("email", "Email taken");
         return ValidationProblem();
       }
-      if (await _userManager.Users.AnyAsync(x => x.UserName == registerDto.Username))
+      if (await _userManager.Users.AnyAsync(x => x.UserName == registerDto.UserName))
       {
         ModelState.AddModelError("username", "Username taken");
         return ValidationProblem();
@@ -67,7 +67,7 @@ namespace API.Controllers
       {
         DisplayName = registerDto.DisplayName,
         Email = registerDto.Email,
-        UserName = registerDto.Username
+        UserName = registerDto.UserName
       };
 
       var result = await _userManager.CreateAsync(user, registerDto.Password);
@@ -95,7 +95,7 @@ namespace API.Controllers
         DisplayName = user.DisplayName,
         Image = null,
         Token = _tokenService.CreateToken(user),
-        Username = user.UserName
+        UserName = user.UserName
       };
     }
   }

@@ -1,5 +1,7 @@
 using Application.Activities;
 using Application.Core;
+using Application.Interfaces;
+using Infrastructure.Security;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -34,8 +36,8 @@ namespace API.Extensions
         opt.AddPolicy("CorsPolicy", policy =>
         {
           //once we deploy ourapplication, this will become irrelevant as we will be serving our appliction from same domain
-          policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000");
-          // policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
+          // policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000");
+          policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
         });
       });
 
@@ -43,6 +45,8 @@ namespace API.Extensions
       services.AddMediatR(typeof(List.Handler).Assembly);
       // AutoMapper is nuget package that will help us with edit putHttprequest to update activity => it will help us to map object properties from one object into another
       services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+      //Here we are adding service that will allow us to access currently logged in user => method is defined in Security UserAccessor.cs, first we have to use interface IUserAccessor and its implementation in UserAccessor. IUserAccessor is defined in Application layer as interface. UserAccessor is defined in Infrastructure. With this service we got the ability to got our currently logged in user name from anywhere in the application as everything is connected to API layer. 
+      services.AddScoped<IUserAccessor, UserAccessor>();
 
       return services;
     }
