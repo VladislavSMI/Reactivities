@@ -1,7 +1,11 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import agent from "../api/agent";
-import { IActivity } from "../models/activity";
+import { ActivityFormValues, IActivity } from "../models/activity";
 import { format } from "date-fns";
+import { store } from "./store";
+import { IProfile } from "../models/profile";
+import { Profiler } from "react";
+import { RatingIcon } from "semantic-ui-react";
 
 export default class ActivityStore {
   //Map with 2 types => first one is key which represents activity id and the second will be Activity object iteself
@@ -78,6 +82,18 @@ export default class ActivityStore {
   };
 
   private setActivity = (activity: IActivity) => {
+    //  We are getting information of cureently logged user
+    const user = store.userStore.user;
+
+    if (user) {
+      activity.isGoing = activity.attendees!.some(
+        (a) => a.userName === user.userName
+      );
+      activity.isHost = activity.hostUsername === user.userName;
+      activity.host = activity.attendees?.find(
+        (x) => x.userName === activity.hostUsername
+      );
+    }
     //old code when we were using date as string
     // activity.date = activity.date.split("T")[0];
     activity.date = new Date(activity.date!);
@@ -93,27 +109,25 @@ export default class ActivityStore {
     this.loadingInitial = state;
   };
 
-  createActivity = async (activity: IActivity) => {
-    this.loading = true;
-
+  createActivity = async (activity: ActivityFormValues) => {
+    const user = store.userStore.user;
+    const attendee = new IProfile(user!);
     try {
       await agent.Activities.create(activity);
+      const newActivity = new IActivity(activity);
+      newActivity.hostUsername = user!.userName;
+      newActivity.attendees = [attendee];
+      this.setActivity(newActivity);
       //this is because of mobx and async await functions => if we run code that changes the state in try await block then have to use this.
       runInAction(() => {
-        this.activityRegistry.set(activity.id, activity);
-        this.selectedActivity = activity;
-        this.editMode = false;
-        this.loading = false;
+        this.selectedActivity = newActivity;
       });
     } catch (error) {
       console.log(error);
-      runInAction(() => {
-        this.loading = false;
-      });
     }
   };
 
-  updateActivity = async (activity: IActivity) => {
+  updateActivity = async (activity: ActivityFormValues) => {
     this.loading = true;
     try {
       await agent.Activities.update(activity);
@@ -123,16 +137,17 @@ export default class ActivityStore {
         //   ...this.activities.filter((a) => a.id !== activity.id),
         //   activity,
         // ];
-
-        this.activityRegistry.set(activity.id, activity);
-        this.editMode = false;
-        this.loading = false;
+        if (activity.id) {
+          let updatedActivity = {
+            ...this.getActivity(activity.id),
+            ...activity,
+          };
+          this.activityRegistry.set(activity.id, updatedActivity as IActivity);
+          this.selectedActivity = updatedActivity as IActivity;
+        }
       });
     } catch (error) {
       console.log(error);
-      runInAction(() => {
-        this.loading = false;
-      });
     }
   };
 
@@ -149,6 +164,60 @@ export default class ActivityStore {
       runInAction(() => {
         this.loading = false;
       });
+    }
+  };
+
+  updateAttendance = async () => {
+    const user = store.userStore.user;
+    this.loading = true;
+
+    try {
+      // 1st updating attendance on the backend
+      await agent.Activities.attend(this.selectedActivity!.id);
+      runInAction(() => {
+        //2nd Updating attendace in store. This is working as a toggle => we check with if selectedActivity isGoing and then changed it to not going
+        if (this.selectedActivity?.isGoing) {
+          // We are going to filter out currently logged in user
+          this.selectedActivity.attendees =
+            this.selectedActivity.attendees?.filter(
+              (a) => a.userName !== user?.userName
+            );
+          this.selectedActivity.isGoing = false;
+        } else {
+          //3rd here we have to create new profile attendee
+          const attendee = new IProfile(user!);
+          this.selectedActivity?.attendees?.push(attendee);
+          this.selectedActivity!.isGoing = true;
+        }
+        //4th which ever option is correct => we have to update activityRegistry
+        this.activityRegistry.set(
+          this.selectedActivity!.id,
+          this.selectedActivity!
+        );
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      runInAction(() => (this.loading = false));
+    }
+  };
+
+  cancelActivityToggle = async () => {
+    this.loading = true;
+    try {
+      await agent.Activities.attend(this.selectedActivity!.id);
+      runInAction(() => {
+        this.selectedActivity!.isCancelled =
+          !this.selectedActivity?.isCancelled;
+        this.activityRegistry.set(
+          this.selectedActivity!.id,
+          this.selectedActivity!
+        );
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      runInAction(() => (this.loading = false));
     }
   };
 }
