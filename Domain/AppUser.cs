@@ -9,5 +9,7 @@ namespace Domain
     public string Bio { get; set; }
     //connection to join table ActiviyAttnedee.cs
     public ICollection<ActivityAttendee> Activities { get; set; }
+    // connection to join table Photo.cs
+    public ICollection<Photo> Photos { get; set; }
   }
 }

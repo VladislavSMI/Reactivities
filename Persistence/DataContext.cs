@@ -16,6 +16,7 @@ namespace Persistence
     public DbSet<Activity> Activities { get; set; }
     //We have to create new DbSet for our join table ActivityAttnedee
     public DbSet<ActivityAttendee> ActivityAttendees { get; set; }
+    public DbSet<Photo> Photos { get; set; }
 
     //thanks to polymorphism, we are changing the OnModelCreating method that is defined on IdentityDbContext base class => we are adding aditional configuration
 
@@ -43,4 +44,4 @@ namespace Persistence
 
 
   }
-}
+} 

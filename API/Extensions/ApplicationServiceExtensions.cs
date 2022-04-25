@@ -1,6 +1,7 @@
 using Application.Activities;
 using Application.Core;
 using Application.Interfaces;
+using Infrastructure.Photos;
 using Infrastructure.Security;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,10 @@ namespace API.Extensions
       services.AddAutoMapper(typeof(MappingProfiles).Assembly);
       //Here we are adding service that will allow us to access currently logged in user => method is defined in Security UserAccessor.cs, first we have to use interface IUserAccessor and its implementation in UserAccessor. IUserAccessor is defined in Application layer as interface. UserAccessor is defined in Infrastructure. With this service we got the ability to got our currently logged in user name from anywhere in the application as everything is connected to API layer. 
       services.AddScoped<IUserAccessor, UserAccessor>();
+      // The same logic as with IUserAccessor and UserAccessor
+      // PhotoAccessor is defined in Infrastrucuture project, we are accessing data in our Application layer via interface IPhotoAccessor and then connecting them here in ApplicationServiceExtensions.cs class
+      services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+      services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));
 
       return services;
     }
