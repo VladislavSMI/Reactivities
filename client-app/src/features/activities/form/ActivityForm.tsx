@@ -12,7 +12,7 @@ import { useStore } from "../../../app/stores/store";
 import { v4 as uuid } from "uuid";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { ActivityFormValues, IActivity } from "../../../app/models/activity";
+import { ActivityFormValues } from "../../../app/models/activity";
 
 //activity: selectedActivity => we are renaming our activity to selectedActivity because we had duplicated use of variable => useState activity
 function ActivityForm() {
@@ -22,7 +22,6 @@ function ActivityForm() {
   const {
     createActivity,
     updateActivity,
-    loading,
     loadActivity,
     loadingInitial,
   } = activityStore;
