@@ -7,6 +7,7 @@ namespace API.Controllers
   public class PhotosController : BaseApiController
   {
     [HttpPost]
+    //[FromForm] => this is atribute, we will use this atribute to tell our api controller where to find the file, the command will include File
     public async Task<IActionResult> Add([FromForm] Add.Command command)
     {
       return HandleResult(await Mediator.Send(command));
