@@ -37,8 +37,8 @@ namespace API.Extensions
         opt.AddPolicy("CorsPolicy", policy =>
         {
           //once we deploy ourapplication, this will become irrelevant as we will be serving our appliction from same domain
-          // policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000");
-          policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
+          policy.AllowAnyMethod().AllowAnyHeader().AllowCredentials().WithOrigins("http://localhost:3000");
+          // policy.AllowAnyMethod().AllowAnyHeader().AllowCredentials().AllowAnyOrigin();
         });
       });
 
@@ -52,6 +52,7 @@ namespace API.Extensions
       // PhotoAccessor is defined in Infrastrucuture project, we are accessing data in our Application layer via interface IPhotoAccessor and then connecting them here in ApplicationServiceExtensions.cs class
       services.AddScoped<IPhotoAccessor, PhotoAccessor>();
       services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));
+      services.AddSignalR();
 
       return services;
     }

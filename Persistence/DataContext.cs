@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence
 {
+  //we are using here IdentityDbContext with type AppUser where we will have assecc to all predefined properties such as UserName, Email etc.
+  //Without identity we can derive from just DbContext
   public class DataContext : IdentityDbContext<AppUser>
   {
     // Constructor for DataContext => it is based on DbContext class so we are passing options from DataContext constractor to DbContext constractor via base(options) (base is constructor inside of DbContext)
@@ -17,6 +19,7 @@ namespace Persistence
     //We have to create new DbSet for our join table ActivityAttnedee
     public DbSet<ActivityAttendee> ActivityAttendees { get; set; }
     public DbSet<Photo> Photos { get; set; }
+    public DbSet<Comment> Comments { get; set; }
 
     //thanks to polymorphism, we are changing the OnModelCreating method that is defined on IdentityDbContext base class => we are adding aditional configuration
 
@@ -39,9 +42,14 @@ namespace Persistence
       .WithMany(a => a.Attendees)
       .HasForeignKey(aa => aa.ActivityId);
 
+      //We will add configuration when activity is deleted that also all comments asociated with that activity will be deleted.
+      builder.Entity<Comment>()
+      .HasOne(a => a.Activity)
+      .WithMany(c => c.Comments)
+      .OnDelete(DeleteBehavior.Cascade);
 
     }
 
 
   }
-} 
+}

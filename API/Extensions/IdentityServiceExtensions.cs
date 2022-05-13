@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.Tasks;
 using API.Services;
 using Domain;
 using Infrastructure.Security;
@@ -34,6 +35,21 @@ namespace API.Extensions
             IssuerSigningKey = key,
             ValidateIssuer = false,
             ValidateAudience = false,
+          };
+
+          opt.Events = new JwtBearerEvents
+          {
+            OnMessageReceived = context =>
+            {
+              //spelling of access_token is important because SignalR on client side is going to pass our token in a query string and key for that query string is going to be "access_token"
+              var accessToken = context.Request.Query["access_token"];
+              var path = context.HttpContext.Request.Path;
+              if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+              {
+                context.Token = accessToken;
+              }
+              return Task.CompletedTask;
+            }
           };
         });
       services.AddAuthorization(opt =>

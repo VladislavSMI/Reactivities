@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 namespace Domain
 {
   public class AppUser : IdentityUser
+
+  //as we are deriving from IdentityUser class, we got access to all aditional properties such as UserName, email adress etc. 
   {
     public string DisplayName { get; set; }
     public string Bio { get; set; }
