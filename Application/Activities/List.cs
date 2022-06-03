@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading;
-using Domain;
 using MediatR;
 using System.Threading.Tasks;
 using Persistence;
@@ -8,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Application.Core;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Application.Interfaces;
 
 namespace Application.Activities
 {
@@ -29,9 +29,11 @@ namespace Application.Activities
       //this is field that will be initialized in constructor
       private readonly DataContext _context;
       private readonly IMapper _mapper;
+      private readonly IUserAccessor _userAccessor;
 
-      public Handler(DataContext context, IMapper mapper)
+      public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
       {
+        this._userAccessor = userAccessor;
         this._mapper = mapper;
         this._context = context;
       }
@@ -45,7 +47,7 @@ namespace Application.Activities
         // This was less efficient code as we were quering more data then nedded 
         // var activities = await _context.Activities.Include(a => a.Attendees).ThenInclude(u => u.AppUser).ToListAsync(cancellationToken);
         // Instead of include we will use automapper method ProjectTo from AutoMapper. We could have it done as well with Select() from Ling, but AutoMapper is easier
-        var activities = await _context.Activities.ProjectTo<ActivityDto>(_mapper.ConfigurationProvider).ToListAsync(cancellationToken);
+        var activities = await _context.Activities.ProjectTo<ActivityDto>(_mapper.ConfigurationProvider, new { currentUsername = _userAccessor.GetUserName() }).ToListAsync(cancellationToken);
 
         //with new ProjectTo we are already returning ActivityDto we don't need to map from activities to ActivityDto
         // var activitiesToReturn = _mapper.Map<List<ActivityDto>>(activities);

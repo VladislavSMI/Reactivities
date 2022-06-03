@@ -20,6 +20,8 @@ namespace Persistence
     public DbSet<ActivityAttendee> ActivityAttendees { get; set; }
     public DbSet<Photo> Photos { get; set; }
     public DbSet<Comment> Comments { get; set; }
+    public DbSet<UserFollowing> UserFollowings { get; set; }
+
 
     //thanks to polymorphism, we are changing the OnModelCreating method that is defined on IdentityDbContext base class => we are adding aditional configuration
 
@@ -42,11 +44,26 @@ namespace Persistence
       .WithMany(a => a.Attendees)
       .HasForeignKey(aa => aa.ActivityId);
 
-      //We will add configuration when activity is deleted that also all comments asociated with that activity will be deleted.
+      //We will add configuration when activity is deleted that a lso all comments asociated with that activity will be deleted.
       builder.Entity<Comment>()
       .HasOne(a => a.Activity)
       .WithMany(c => c.Comments)
       .OnDelete(DeleteBehavior.Cascade);
+
+      builder.Entity<UserFollowing>(b =>
+      {
+        b.HasKey(k => new { k.ObserverId, k.TargetId });
+
+        b.HasOne(o => o.Observer)
+          .WithMany(f => f.Followings)
+          .HasForeignKey(o => o.ObserverId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+        b.HasOne(o => o.Target)
+          .WithMany(f => f.Followers)
+          .HasForeignKey(o => o.TargetId)
+          .OnDelete(DeleteBehavior.Cascade);
+      });
 
     }
 
