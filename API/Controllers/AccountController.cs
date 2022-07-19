@@ -126,7 +126,7 @@ namespace API.Controllers
 
       var cookieOptions = new CookieOptions
       {
-        //our cookie will be not accessible via JavaScript, it is OK we have to access it only on the server
+        //Our cookie will be not accessible via JavaScript, it is OK we have to access it only on the server
         HttpOnly = true,
         Expires = DateTime.UtcNow.AddDays(7)
 
