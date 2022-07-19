@@ -11,7 +11,6 @@ import ActivityDetailedSidebar from "./ActivityDetailedSidebar";
 
 function ActivityDetails() {
   const { activityStore } = useStore();
-  //selectedActivity: activity => if we want to rename property in destructuring
   const {
     selectedActivity: activity,
     loadActivity,
@@ -27,12 +26,11 @@ function ActivityDetails() {
     }
   }, [id, loadActivity, clearSelectedActivity]);
 
-  //just temporary fix the problem with activity error undefined
   if (loadingInitial || !activity)
     return <LoadingComponent content={"Loading..."} />;
 
   return (
-    <Grid>
+    <Grid columns={2} reversed="mobile" stackable className="mobile">
       <Grid.Column width={10}>
         <ActivityDetailedHeader activity={activity} />
         <ActivityDetailedInfo activity={activity} />

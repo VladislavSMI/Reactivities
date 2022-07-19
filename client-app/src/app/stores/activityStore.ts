@@ -85,14 +85,14 @@ export default class ActivityStore {
 
   get groupedActivities() {
     return Object.entries(
-      this.activitiesByDate.reduce((activities, activity) => {
-        //this will represent key for each of our objects
-        const date = format(activity.date!, "dd MMM yyyy");
-        activities[date] = activities[date]
-          ? [...activities[date], activity]
-          : [activity];
-        return activities;
-        // initial value is empty object as type [key: string]: IActivity[]
+      this.activitiesByDate.reduce((accumulator, currentValue) => {
+        const key = format(currentValue.date!, "dd MMM yyyy");
+
+        accumulator[key] = accumulator[key]
+          ? [...accumulator[key], currentValue]
+          : [currentValue];
+
+        return accumulator;
       }, {} as { [key: string]: IActivity[] })
     );
   }
@@ -119,7 +119,7 @@ export default class ActivityStore {
     let activity = this.getActivity(id);
     if (activity) {
       this.selectedActivity = activity;
-      //we are returning here activity so we can use it in Activity Form, where we are direclty calling loadActivity method in useEffect with then and set local state. If we use selectedActivity in  ActivityForm after useEffect with loadActivity(id) we will have timing issue. Our initial state will be empty, then we will loadAcitivty, which will change selected activity and then another render for component. With current solution we will have less rendering
+      //we are returning here activity so we can use it in Activity Form, where we are directly calling loadActivity method in useEffect with then and set local state. If we use selectedActivity in  ActivityForm after useEffect with loadActivity(id) we will have timing issue. Our initial state will be empty, then we will loadAcitivty, which will change selected activity and then another render for component. With current solution we will have less rendering
       return activity;
       //if there is no activity loaded in our store, then we have to make api call
     } else {
